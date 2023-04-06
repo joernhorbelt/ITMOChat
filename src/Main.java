@@ -63,19 +63,28 @@ public class Main extends Application {
         String username = "bömi";
         String message = "Huhuuu";
         submit.setOnAction(e -> {
-            System.out.println(userInput.getText());
-            chat.getChildren().add(new Text(username + " : " + userInput.getText()));
-            userInput.setText("");
-            userInput.requestFocus();
+            if (userInput.getText().equals("")) {
+                System.out.println("No input");
+                userInput.requestFocus();
+            } else {
+                System.out.println(userInput.getText());
+                chat.getChildren().add(new Text(username + " : " + userInput.getText()));
+                userInput.setText("");
+                userInput.requestFocus();
+            }
         });
 
         userInput.setOnKeyPressed(ke -> {
             if (ke.getCode().equals(KeyCode.ENTER)) {
-                System.out.println(userInput.getText());
-                chat.getChildren().add(new Text(username + " : " + userInput.getText()));
-                userInput.setText("");
-
-
+                if (userInput.getText().equals("")) {
+                    System.out.println("No input");
+                    userInput.requestFocus();
+                } else {
+                    System.out.println(userInput.getText());
+                    chat.getChildren().add(new Text(username + " : " + userInput.getText()));
+                    userInput.setText("");
+                    userInput.requestFocus();
+                }
             }
         });
 
