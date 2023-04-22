@@ -18,14 +18,15 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class ClientMain extends Application {
+    static VBox test = new VBox();
     public static void main(String[] args) {
-        //launch(args);
+        launch(args);
         //Application.launch(Main.class, args);
-        try (Socket socket = new Socket("localhost", 5000)) {
-            BufferedReader input = new BufferedReader(new java.io.InputStreamReader(socket.getInputStream()));
+        /*try (Socket socket = new Socket("localhost", 5000)) {
+            BufferedReader inputReader = new BufferedReader(new java.io.InputStreamReader(socket.getInputStream()));
             PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
             Scanner scanner = new Scanner(System.in);
-            String userInput;
+            String userInputMessage;
             String response;
             String clientName = "empty";
             ClientThread clientThread = new ClientThread(socket);
@@ -34,25 +35,25 @@ public class ClientMain extends Application {
             do {
                 if (clientName.equals("empty")) {
                     System.out.println("Enter your name");
-                    userInput = scanner.nextLine();
-                    clientName = userInput;
-                    output.println(userInput);
-                    if (userInput.equals("exit")) {
+                    userInputMessage = scanner.nextLine();
+                    clientName = userInputMessage;
+                    output.println(userInputMessage);
+                    if (userInputMessage.equals("exit")) {
                         break;
                     }
                 } else {
                     String message = ("(" + clientName + ")" + " message ");
                     System.out.println(message);
-                    userInput = scanner.nextLine();
-                    output.println(message + " " + userInput);
-                    if (userInput.equals("exit")) {
+                    userInputMessage = scanner.nextLine();
+                    output.println(message + " " + userInputMessage);
+                    if (userInputMessage.equals("exit")) {
                         break;
                     }
                 }
-            } while (!userInput.equals("exit"));
+            } while (!userInputMessage.equals("exit"));
         } catch (Exception e) {
             System.out.println("Exception in client main" + e.getStackTrace());
-        }
+        }*/
     }
 
     public void start(Stage primaryStage) throws Exception {
@@ -73,7 +74,7 @@ public class ClientMain extends Application {
 
 
         VBox chat = new VBox();
-        ScrollPane scrollPane = new ScrollPane(chat);
+        ScrollPane scrollPane = new ScrollPane(test);
         scrollPane.vvalueProperty().bind(chat.heightProperty());
 
 
@@ -98,37 +99,68 @@ public class ClientMain extends Application {
         Scene scene = new Scene(root, 1000,700);
         String username = "bömi";
         //AtomicReference<String> message = null;
-        submit.setOnAction(e -> {
-            if (userInput.getText().equals("")) {
-                System.out.println("No input");
-                userInput.requestFocus();
-            } else {
-                //message.set(userInput.getText());
-                System.out.println(userInput.getText());
-                String message = userInput.getText();
-                chat.getChildren().add(new Text(username + " : " + message));
-                userInput.setText("");
-                userInput.requestFocus();
-            }
-        });
 
-        userInput.setOnKeyPressed(ke -> {
-            if (ke.getCode().equals(KeyCode.ENTER)) {
-                if (userInput.getText().equals("")) {
-                    System.out.println("No input");
-                    userInput.requestFocus();
-                } else {
-                    System.out.println(userInput.getText());
-                    //message.set(userInput.getText());
-                    String message = userInput.getText();
-                    chat.getChildren().add(new Text(username + " : " + message));
-                    userInput.setText("");
-                    userInput.requestFocus();
-                }
-            }
-        });
+
+
+
+
 
         primaryStage.setScene(scene);
         primaryStage.show();
+
+            new Thread(() ->{
+                try  {
+                    Socket socket = new Socket("localhost", 5000);
+                    BufferedReader inputReader = new BufferedReader(new java.io.InputStreamReader(socket.getInputStream()));
+                    PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
+                    Scanner scanner = new Scanner(System.in);
+                    String userInputMessage;
+                    String response;
+                    String clientName = "empty";
+                    ClientThread clientThread = new ClientThread(socket);
+                    clientThread.start();
+                    submit.setOnAction(e -> {
+                        if (userInput.getText().equals("")) {
+                            System.out.println("No input");
+                            userInput.requestFocus();
+                        } else {
+                            //message.set(userInput.getText());
+                            System.out.println(userInput.getText());
+                            String message = userInput.getText();
+                            output.println(username+ ": "+message);
+                            //test.getChildren().add(new Text(username + " : " + message));
+                            userInput.setText("");
+                            userInput.requestFocus();
+                        }
+                    });
+
+                    userInput.setOnKeyPressed(ke -> {
+                        if (ke.getCode().equals(KeyCode.ENTER)) {
+                            if (userInput.getText().equals("")) {
+                                System.out.println("No input");
+                                userInput.requestFocus();
+                            } else {
+                                System.out.println(userInput.getText());
+                                //message.set(userInput.getText());
+                                String message = userInput.getText();
+                                output.println(username+ ": "+message);
+                                //test.getChildren().add(new Text(username + " : " + message));
+                                userInput.setText("");
+                                userInput.requestFocus();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    System.out.println("Exception in client main" + e.getStackTrace());
+                }
+            }).start();
+
+
+    }
+
+    public static void createMessageTextBox(String message) {
+        test.getChildren().add(new Text(message));
+        System.out.println(message+ "test erfolgreich");
+
     }
 }
