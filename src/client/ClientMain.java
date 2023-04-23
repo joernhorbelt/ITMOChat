@@ -12,13 +12,11 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
-import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class ClientMain extends Application {
-    static VBox test = new VBox();
+    static VBox chat = new VBox();
     public static void main(String[] args) {
         launch(args);
         //Application.launch(Main.class, args);
@@ -73,8 +71,8 @@ public class ClientMain extends Application {
         userList.setPrefWidth(200);
 
 
-        VBox chat = new VBox();
-        ScrollPane scrollPane = new ScrollPane(test);
+
+        ScrollPane scrollPane = new ScrollPane(chat);
         scrollPane.vvalueProperty().bind(chat.heightProperty());
 
 
@@ -98,7 +96,7 @@ public class ClientMain extends Application {
         root.setStyle("-fx-font-size: 18");
         Scene scene = new Scene(root, 1000,700);
         String username = "bömi";
-        //AtomicReference<String> message = null;
+
 
 
 
@@ -111,12 +109,9 @@ public class ClientMain extends Application {
             new Thread(() ->{
                 try  {
                     Socket socket = new Socket("localhost", 5000);
-                    BufferedReader inputReader = new BufferedReader(new java.io.InputStreamReader(socket.getInputStream()));
+
                     PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-                    Scanner scanner = new Scanner(System.in);
-                    String userInputMessage;
-                    String response;
-                    String clientName = "empty";
+
                     ClientThread clientThread = new ClientThread(socket);
                     clientThread.start();
                     submit.setOnAction(e -> {
@@ -159,7 +154,7 @@ public class ClientMain extends Application {
     }
 
     public static void createMessageTextBox(String message) {
-        test.getChildren().add(new Text(message));
+        chat.getChildren().add(new Text(message));
         System.out.println(message+ "test erfolgreich");
 
     }
