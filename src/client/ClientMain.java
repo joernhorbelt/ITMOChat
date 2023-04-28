@@ -1,6 +1,7 @@
 package client;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -14,46 +15,16 @@ import javafx.stage.Stage;
 
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ClientMain extends Application {
     static VBox chat = new VBox();
     public static void main(String[] args) {
         launch(args);
         //Application.launch(Main.class, args);
-        /*try (Socket socket = new Socket("localhost", 5000)) {
-            BufferedReader inputReader = new BufferedReader(new java.io.InputStreamReader(socket.getInputStream()));
-            PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-            Scanner scanner = new Scanner(System.in);
-            String userInputMessage;
-            String response;
-            String clientName = "empty";
-            ClientThread clientThread = new ClientThread(socket);
-            clientThread.start();
 
-            do {
-                if (clientName.equals("empty")) {
-                    System.out.println("Enter your name");
-                    userInputMessage = scanner.nextLine();
-                    clientName = userInputMessage;
-                    output.println(userInputMessage);
-                    if (userInputMessage.equals("exit")) {
-                        break;
-                    }
-                } else {
-                    String message = ("(" + clientName + ")" + " message ");
-                    System.out.println(message);
-                    userInputMessage = scanner.nextLine();
-                    output.println(message + " " + userInputMessage);
-                    if (userInputMessage.equals("exit")) {
-                        break;
-                    }
-                }
-            } while (!userInputMessage.equals("exit"));
-        } catch (Exception e) {
-            System.out.println("Exception in client main" + e.getStackTrace());
-        }*/
     }
-
     public void start(Stage primaryStage) throws Exception {
         BorderPane root = new BorderPane();
         HBox header= new HBox();
@@ -95,11 +66,6 @@ public class ClientMain extends Application {
                 "'Lucida Sans Unicode'");
         root.setStyle("-fx-font-size: 18");
         Scene scene = new Scene(root, 1000,700);
-        String username = "bömi";
-
-
-
-
 
 
 
@@ -107,11 +73,16 @@ public class ClientMain extends Application {
         primaryStage.show();
 
             new Thread(() ->{
-                try  {
+                try {
+                    Scanner sc = new Scanner(System.in);
+                    System.out.println("Username eingeben");
+                    String username= (sc.nextLine());
+                    Platform.runLater(() -> {
+                        userList.getChildren().add(new Text(username));
+                    });
+
                     Socket socket = new Socket("localhost", 5000);
-
                     PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-
                     ClientThread clientThread = new ClientThread(socket);
                     clientThread.start();
                     submit.setOnAction(e -> {
