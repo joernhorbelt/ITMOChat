@@ -9,6 +9,7 @@ import java.net.Socket;
 public class LoginServer{
 
     public static void main(String[] args) {
+        //mysql database connection details
         String url = "jdbc:mysql://localhost:3306/chatMember";
         String user = "root";
         String pass = "";
@@ -19,7 +20,7 @@ public class LoginServer{
             //inputstream reader that recieves login data from clients
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter loginOut = new PrintWriter(socket.getOutputStream(), true);
-            //mysql database connection details
+            //connect to mysql database
             Connection con = DriverManager.getConnection(url, user, pass);
             Statement stm = con.createStatement();
             // Connect to database
