@@ -36,7 +36,7 @@ public class LoginThread extends Thread {
                 int count = rs.getInt(1);
                 if (count > 0) {
                     //login data correct. successful login
-                    Socket socketLoginToServer = new Socket("localhost", 5002);
+                    Socket socketLoginToServer = new Socket("192.168.13.123", 5002);
                     PrintWriter outToUserlist = new PrintWriter(socketLoginToServer.getOutputStream(), true);
                     System.out.println("login successful");
                     output.println(username);

@@ -79,7 +79,7 @@ public class ClientMain extends Application {
         primaryStage.show();
         new Thread(() ->{
             try {
-                Socket socket = new Socket("localhost", 5002);
+                Socket socket = new Socket("192.168.13.123", 5002);
                 BufferedReader userListReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 while (true) {
                     String username = userListReader.readLine();
@@ -256,7 +256,7 @@ public class ClientMain extends Application {
                 userList.getChildren().add(new Text(username));
             });
 
-            Socket socket = new Socket("localhost", 5000);
+            Socket socket = new Socket("192.168.13.123", 5000);
             PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
             ClientThread clientThread = new ClientThread(socket);
             clientThread.start();
@@ -336,7 +336,7 @@ public class ClientMain extends Application {
             // Get username from text field
             Socket socket = null;
             try {
-                socket = new Socket("localhost", 5001);
+                socket = new Socket("192.168.13.123", 5001);
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 String loginData = usernameTF.getText() + ";" + passwordTF.getText();
                 username = usernameTF.getText();

@@ -29,10 +29,10 @@ public class ServerThread extends Thread {
                     break;
                 }
                 printToAllClients(outputString);
-                System.out.println("Server recieved " + outputString);
+                System.out.println("Server received " + outputString);
             }
         } catch (Exception e) {
-            System.out.println("Error occured in main of server"+ e.getStackTrace());
+            System.out.println("Error occurred in main of server"+ e.getStackTrace());
         }
     }
 
