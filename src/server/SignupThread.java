@@ -5,10 +5,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 
 public class SignupThread extends Thread {
     private Socket socket;
@@ -42,8 +39,15 @@ public class SignupThread extends Thread {
                 } else if (count == 0) {
                     System.out.println("Registration Successful");
                     output.println("Registration successful");
-                    stm.executeQuery("INSERT INTO tbl_member values (null, '" + username + "," + password + "')");
-
+                    try {
+                        String insertInto = "Insert into tbl_member (username,password) values(?,?)";
+                        PreparedStatement statement = con.prepareStatement(insertInto);
+                        statement.setString(1,username);
+                        statement.setString(2,password);
+                        statement.executeUpdate();
+                    } catch (SQLException e) {
+                        System.out.println(e);
+                    }
                 }
             }
         } catch (Exception e) {
