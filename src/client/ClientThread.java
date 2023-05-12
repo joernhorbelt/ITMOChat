@@ -2,7 +2,6 @@ package client;
 
 import javafx.application.Platform;
 import javafx.scene.text.Text;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

@@ -11,73 +11,32 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicReference;
+
 
 public class ClientMain extends Application {
     static String username;
     static VBox chat = new VBox();
     static VBox userList = new VBox();
+
     public static void main(String[] args) {
         launch(args);
         //Application.launch(Main.class, args);
-
     }
-    public void start(Stage primaryStage) throws Exception {
-        /*BorderPane root = new BorderPane();
-        root.setMinSize(1000,700);
-        HBox header= new HBox();
-        Text title = new Text("ITMO Chat");
-        title.setTextAlignment(TextAlignment.CENTER);
-        header.getChildren().add(title);
-        VBox userList = new VBox();
-        Border border = new Border(new BorderStroke(Color.BLACK,
-                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
-        userList.setBorder(border);
-        //toolbar.setBorder(border);
-        Text textField = new Text("Bömi");
-
-        userList.getChildren().addAll(textField);
-        userList.setPrefWidth(200);
 
 
+    public void start(Stage primaryStage) {
 
-        ScrollPane scrollPane = new ScrollPane(chat);
-        scrollPane.vvalueProperty().bind(chat.heightProperty());
-
-
-        HBox input = new HBox();
-        input.setBorder(border);
-        input.setPrefWidth(1000);
-        TextField userInput = new TextField();
-        userInput.setPrefWidth(800);
-        userInput.maxWidth(800);
-
-        input.getChildren().add(userInput);
-        Button submit = new Button("Submit");
-        input.getChildren().add(submit);
-        root.setTop(header);
-        root.setRight(userList);
-        root.setBottom(input);
-        root.setCenter(scrollPane);
-        //root.setCenter(chat);
-        root.setStyle("-fx-font-family: " +
-                "'Lucida Sans Unicode'");
-        root.setStyle("-fx-font-size: 18");
-        Scene scene = new Scene(root, 1000,700);*/
-        Scene loginScene = new Scene(createLoginPane(primaryStage));
-
+        Scene loginScene = new Scene(createRegisterGridPane(primaryStage, new Scene(createLoginPane(primaryStage))));
 
 
         primaryStage.setScene(loginScene);
         primaryStage.show();
-        new Thread(() ->{
+        new Thread(() -> {
             try {
                 Socket socket = new Socket("192.168.13.123", 5002);
                 BufferedReader userListReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -87,84 +46,16 @@ public class ClientMain extends Application {
                     Platform.runLater(() -> {
                         // adds the received message to a JavaFX GUI element
                         userList.getChildren().add(new Text(username));
-                    } );
+                    });
                 }
             } catch (Exception e) {
                 System.out.println(e.getStackTrace());
             }
 
         });
-        /*new Thread(() -> {
-            try {
-                Socket loginsocket = new Socket("localhost", 5001);
-                PrintWriter output = new PrintWriter(loginsocket.getOutputStream(), true);
-                Scanner sc = new Scanner(System.in);
-                System.out.println("username;password");
-                String login = sc.nextLine();
-                output.println(login);
-            } catch (Exception e) {
-                System.out.println(e.getStackTrace());
-            }
-
-        }).start();*/
-
-            /*new Thread(() ->{
-                try {
-                    Scanner sc = new Scanner(System.in);
-                    System.out.println("Username eingeben");
-                    String username= (sc.nextLine());
-                    Platform.runLater(() -> {
-                        //userList.getChildren().add(new Text(username));
-                    });
-
-                    Socket socket = new Socket("localhost", 5000);
-                    PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-                    ClientThread clientThread = new ClientThread(socket);
-                    clientThread.start();
-                    submit.setOnAction(e -> {
-                        if (userInput.getText().equals("")) {
-                            System.out.println("No input");
-                            userInput.requestFocus();
-                        } else {
-                            //message.set(userInput.getText());
-                            System.out.println(userInput.getText());
-                            String message = userInput.getText();
-                            output.println(username+ ": "+message);
-                            //test.getChildren().add(new Text(username + " : " + message));
-                            userInput.setText("");
-                            userInput.requestFocus();
-                        }
-                    });
-
-                    userInput.setOnKeyPressed(ke -> {
-                        if (ke.getCode().equals(KeyCode.ENTER)) {
-                            if (userInput.getText().equals("")) {
-                                System.out.println("No input");
-                                userInput.requestFocus();
-                            } else {
-                                System.out.println(userInput.getText());
-                                //message.set(userInput.getText());
-                                String message = userInput.getText();
-                                output.println(username+ ": "+message);
-                                //test.getChildren().add(new Text(username + " : " + message));
-                                userInput.setText("");
-                                userInput.requestFocus();
-                            }
-                        }
-                    });
-                } catch (Exception e) {
-                    System.out.println("Exception in client main" + e.getStackTrace());
-                }
-            }).start();*/
-
 
     }
 
-    public static void createMessageTextBox(String message) {
-        chat.getChildren().add(new Text(message));
-        System.out.println(message+ "test erfolgreich");
-
-    }
     // Create the registration pane and return it
     public GridPane createRegisterGridPane(Stage primaryStage, Scene loginScene) {
         primaryStage.setTitle("Registrieren");
@@ -196,6 +87,29 @@ public class ClientMain extends Application {
             // Get the username and password entered by the user
             String username = regUserTextfield.getText();
             String password = regPassTextfield.getText();
+            Socket socket = null;
+            try {
+                socket = new Socket("192.168.13.123", 5002);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                String signUpData = username + ";" + password;
+                out.println(signUpData);
+                String signupCheck = reader.readLine();
+                if (signupCheck.equals("Benutzername bereits vorhanden")) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setHeaderText(null);
+                    alert.setContentText(signupCheck);
+                    alert.showAndWait();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setHeaderText(null);
+                    alert.setContentText(signupCheck);
+                    alert.showAndWait();
+                    primaryStage.setScene(loginScene);
+                }
+            } catch (IOException exception) {
+                System.out.println("Signup connection cannot be established");
+            }
 
             primaryStage.setTitle("Login");
             primaryStage.setScene(loginScene);
@@ -210,10 +124,11 @@ public class ClientMain extends Application {
         return gridPaneRegister;
     }
 
-    public BorderPane chatWindowPane(Stage primaryStage){
+    public BorderPane chatWindowPane(Stage primaryStage) {
         BorderPane root = new BorderPane();
-        root.setMinSize(1000,700);
-        HBox header= new HBox();
+        root.setStyle("-fx-background-color: black");
+        root.setMinSize(1000, 700);
+        HBox header = new HBox();
         Text title = new Text("ITMO Chat");
         title.setTextAlignment(TextAlignment.CENTER);
         header.getChildren().add(title);
@@ -222,11 +137,10 @@ public class ClientMain extends Application {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
         userList.setBorder(border);
         //toolbar.setBorder(border);
-        Text textField = new Text("Bömi");
+        //Text textField = new Text("Bömi");
 
-        userList.getChildren().addAll(textField);
+        //userList.getChildren().addAll(textField);
         userList.setPrefWidth(200);
-
 
 
         ScrollPane scrollPane = new ScrollPane(chat);
@@ -255,11 +169,14 @@ public class ClientMain extends Application {
             Platform.runLater(() -> {
                 userList.getChildren().add(new Text(username));
             });
-
+            //socket connecting to the chat server
             Socket socket = new Socket("192.168.13.123", 5000);
+            //outputstream that sends messages to the chat server
             PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
+            //new thread that waits and reads for messages sent from the chat server
             ClientThread clientThread = new ClientThread(socket);
             clientThread.start();
+            //eventlistener for the submit button, prints the message to the chat server if the message is not empty
             submit.setOnAction(e -> {
                 if (userInput.getText().equals("")) {
                     System.out.println("No input");
@@ -268,13 +185,13 @@ public class ClientMain extends Application {
                     //message.set(userInput.getText());
                     System.out.println(userInput.getText());
                     String message = userInput.getText();
-                    output.println(username+ ": "+message);
+                    output.println(username + ": " + message);
                     //test.getChildren().add(new Text(username + " : " + message));
                     userInput.setText("");
                     userInput.requestFocus();
                 }
             });
-
+            //eventlistener for enter key, same logic as the submit button
             userInput.setOnKeyPressed(ke -> {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
                     if (userInput.getText().equals("")) {
@@ -284,7 +201,7 @@ public class ClientMain extends Application {
                         System.out.println(userInput.getText());
                         //message.set(userInput.getText());
                         String message = userInput.getText();
-                        output.println(username+ ": "+message);
+                        output.println(username + ": " + message);
                         //test.getChildren().add(new Text(username + " : " + message));
                         userInput.setText("");
                         userInput.requestFocus();
@@ -296,7 +213,9 @@ public class ClientMain extends Application {
         }
 
         return root;
-    };
+    }
+
+    ;
 
     public GridPane createLoginPane(Stage primaryStage) {
 
@@ -336,22 +255,35 @@ public class ClientMain extends Application {
             // Get username from text field
             Socket socket = null;
             try {
+                //socket connecting to the login server
                 socket = new Socket("192.168.13.123", 5001);
+                //input/outputstreams to the login server
+                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                //get data from login text fields
                 String loginData = usernameTF.getText() + ";" + passwordTF.getText();
                 username = usernameTF.getText();
+                //send logindata to the login server
                 out.println(loginData);
-                System.out.println(loginData);
-                Scene root = new Scene(chatWindowPane(primaryStage));
-                primaryStage.setScene(root);
+                //reading response from the login server
+                String loginCheck = reader.readLine();
+                if (loginCheck.equals("success")) {
+                    //start the chat if login is successful
+                    Scene root = new Scene(chatWindowPane(primaryStage));
+                    //root.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
+                    primaryStage.setScene(root);
+                } else {
+                    //if login unsuccessful, show alert
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setHeaderText(null);
+                    alert.setContentText(loginCheck);
+                    alert.showAndWait();
+                }
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
-
-
         });
-
         // Event handler for clear button
         clearButton.setOnMouseClicked(f -> {
             // Clear the text fields

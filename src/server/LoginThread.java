@@ -36,12 +36,13 @@ public class LoginThread extends Thread {
                 int count = rs.getInt(1);
                 if (count > 0) {
                     //login data correct. successful login
-                    Socket socketLoginToServer = new Socket("192.168.13.123", 5002);
-                    PrintWriter outToUserlist = new PrintWriter(socketLoginToServer.getOutputStream(), true);
+                    //Socket socketLoginToServer = new Socket("192.168.13.123", 5002);
+                    //PrintWriter outToUserlist = new PrintWriter(socketLoginToServer.getOutputStream(), true);
                     System.out.println("login successful");
-                    output.println(username);
-                    outToUserlist.println(username);
-                } else {
+                    output.println("success");
+                    //outToUserlist.println(username);
+                } else if(count==0) {
+                    output.println("Invalid username or password");
                     System.out.println("Invalid username or password");
                 }
             }
