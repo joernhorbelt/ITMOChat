@@ -41,7 +41,7 @@ public class ClientThread extends Thread {
             try {
                 // closes the BufferedReader used to read input from the socket
                 input.close();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

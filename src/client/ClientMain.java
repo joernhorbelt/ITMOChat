@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 
 public class ClientMain extends Application {
@@ -42,7 +45,6 @@ public class ClientMain extends Application {
                 BufferedReader userListReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 while (true) {
                     String username = userListReader.readLine();
-                    System.out.println("username tralalal");
                     Platform.runLater(() -> {
                         // adds the received message to a JavaFX GUI element
                         userList.getChildren().add(new Text(username));
@@ -51,9 +53,7 @@ public class ClientMain extends Application {
             } catch (Exception e) {
                 System.out.println(e.getStackTrace());
             }
-
         });
-
     }
 
     // Create the registration pane and return it
@@ -86,7 +86,15 @@ public class ClientMain extends Application {
         buttonRegister.setOnMouseClicked(e -> {
             // Get the username and password entered by the user
             String username = regUserTextfield.getText();
-            String password = regPassTextfield.getText();
+            String password;
+            try {
+                final MessageDigest digest = MessageDigest.getInstance("SHA3-256");
+                final byte[] hashbytes = digest.digest(
+                        regPassTextfield.getText().getBytes(StandardCharsets.UTF_8));
+                password = bytesToHex(hashbytes);
+            } catch (NoSuchAlgorithmException ex) {
+                throw new RuntimeException(ex);
+            }
             Socket socket = null;
             try {
                 socket = new Socket("192.168.13.123", 5002);
@@ -100,19 +108,20 @@ public class ClientMain extends Application {
                     alert.setHeaderText(null);
                     alert.setContentText(signupCheck);
                     alert.showAndWait();
-                } else {
+                } else if(signupCheck.equals("Registration successful")) {
+                    //if login was succesful
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setHeaderText(null);
                     alert.setContentText(signupCheck);
                     alert.showAndWait();
+                    primaryStage.setTitle("Login");
                     primaryStage.setScene(loginScene);
                 }
             } catch (IOException exception) {
                 System.out.println("Signup connection cannot be established");
             }
-
-            primaryStage.setTitle("Login");
-            primaryStage.setScene(loginScene);
+            //primaryStage.setTitle("Login");
+            //primaryStage.setScene(loginScene);
         });
 
         // Button click event handler for buttonRegistriert
@@ -215,7 +224,7 @@ public class ClientMain extends Application {
         return root;
     }
 
-    ;
+
 
     public GridPane createLoginPane(Stage primaryStage) {
 
@@ -254,6 +263,7 @@ public class ClientMain extends Application {
         submitButton.setOnMouseClicked(f -> {
             // Get username from text field
             Socket socket = null;
+
             try {
                 //socket connecting to the login server
                 socket = new Socket("192.168.13.123", 5001);
@@ -261,10 +271,22 @@ public class ClientMain extends Application {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 //get data from login text fields
-                String loginData = usernameTF.getText() + ";" + passwordTF.getText();
+                String password;
+                try {
+                    final MessageDigest digest = MessageDigest.getInstance("SHA3-256");
+                    final byte[] hashbytes = digest.digest(
+                            passwordTF.getText().getBytes(StandardCharsets.UTF_8));
+                    password = bytesToHex(hashbytes);
+                } catch (NoSuchAlgorithmException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+                String loginData = usernameTF.getText() + ";" + password;
                 username = usernameTF.getText();
                 //send logindata to the login server
+                //out.println(usernameTF.getText());
                 out.println(loginData);
+                //out.println(password);
                 //reading response from the login server
                 String loginCheck = reader.readLine();
                 if (loginCheck.equals("success")) {
@@ -272,6 +294,7 @@ public class ClientMain extends Application {
                     Scene root = new Scene(chatWindowPane(primaryStage));
                     //root.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
                     primaryStage.setScene(root);
+                    socket.close();
                 } else {
                     //if login unsuccessful, show alert
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -289,6 +312,7 @@ public class ClientMain extends Application {
             // Clear the text fields
             usernameTF.clear();
             passwordTF.clear();
+            usernameTF.requestFocus();
         });
 
         // Event handler for "zurück" button
@@ -302,5 +326,15 @@ public class ClientMain extends Application {
 
         return gridPaneLogin;
     }
-
+    private static String bytesToHex(byte[] hash) {
+        StringBuilder hexString = new StringBuilder(2 * hash.length);
+        for (int i = 0; i < hash.length; i++) {
+            String hex = Integer.toHexString(0xff & hash[i]);
+            if(hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+        return hexString.toString();
+    }
 }
