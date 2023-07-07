@@ -19,6 +19,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class ClientMain extends Application {
@@ -66,6 +68,9 @@ public class ClientMain extends Application {
         Label regPassword = new Label("Password");
         TextField regUserTextfield = new TextField();
         PasswordField regPassTextfield = new PasswordField();
+        Text pwMatchText = new Text("Invalid Password");
+        pwMatchText.setVisible(false);
+        pwMatchText.setFill(Color.RED);
 
         // Create the registration pane and set its properties
         GridPane gridPaneRegister = new GridPane();
@@ -81,11 +86,39 @@ public class ClientMain extends Application {
         gridPaneRegister.add(regPassTextfield, 1, 1);
         gridPaneRegister.add(buttonRegister, 0, 2);
         gridPaneRegister.add(buttonRegistriert, 1, 2);
+        gridPaneRegister.add(pwMatchText, 2, 1);
+
+        // Method to notify the user if the password is valid, shows/hides text field if regex pattern is matched
+        regPassTextfield.setOnKeyReleased(e ->{
+            Pattern patternPassword = Pattern.compile("^(?!.*?[;])(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
+            Matcher matcherPassword = patternPassword.matcher(regPassTextfield.getText());
+            if (!(matcherPassword.matches())) {
+                pwMatchText.setVisible(true);
+            } else if (matcherPassword.matches()) {
+                pwMatchText.setVisible(false);
+            }
+        });
+
 
         // Set action for the registration button click
         buttonRegister.setOnMouseClicked(e -> {
             // Get the username and password entered by the user
-            String username = regUserTextfield.getText();
+            Pattern patternPassword = Pattern.compile("^(?!.*?[;])(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
+            Pattern patterUsername = Pattern.compile("^(?!.*?;).{3,}$");
+            Matcher matcherPassword = patternPassword.matcher(regPassTextfield.getText());
+            Matcher matcherUsername = patterUsername.matcher(regUserTextfield.getText());
+            if (!(matcherPassword.matches())) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setContentText("Passwort muss mindestens eine Zahl ein Großbuchstaben ein Kleinbuchstaben und ein Sonderzeichen enthalten und 8 Zeichen lang sein.");
+                alert.showAndWait();
+                return;
+            } else if (!(matcherUsername.matches())) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setContentText("Username muss mindestens 3 Zeichen lang sein und darf kein';' enthalten");
+                alert.showAndWait();
+                return;
+            }
+            String username = regUserTextfield.getText().trim();
             String password;
             try {
                 final MessageDigest digest = MessageDigest.getInstance("SHA3-256");
